@@ -24,7 +24,7 @@ warehouse_tables = {
     "product_category": "dim_product_category",
     "products": "dim_product",
     "orders": "fact_orders",
-    "order_items": "dim_order_items"
+    "order_items": "fact_order_items"
 }
 
 dimension_columns = {
@@ -36,7 +36,7 @@ dimension_columns = {
     "dim_product_category": ["product_category_id", "product_category_name"],
     "dim_product": ["product_id", "product_category_id", "product_name", "product_price"],
     "fact_orders": ['order_id', 'order_date', 'user_id', 'payment_id', 'shipper_id', 'order_price', 'order_discount', 'voucher_id', 'order_total', 'rating_id'],
-    "dim_order_items": ["order_item_id", "order_id", "product_id", "order_item_quantity", "product_discount", "product_subdiscount", "product_price", "product_subprice"]
+    "fact_order_items": ["order_item_id", "order_id", "product_id", "order_item_quantity", "product_discount", "product_subdiscount", "product_price", "product_subprice"]
 }
 
 ddl_statements = {
@@ -48,8 +48,8 @@ ddl_statements = {
      "dim_product_category": "CREATE TABLE IF NOT EXISTS dim_product_category (product_category_id INT NOT NULL PRIMARY KEY, product_category_name VARCHAR(255) NOT NULL);",
     "dim_product": "CREATE TABLE IF NOT EXISTS dim_product (product_id INT NOT NULL PRIMARY KEY, product_category_id INT NOT NULL, product_name VARCHAR(255) NOT NULL, product_price INT NOT NULL, FOREIGN KEY (product_category_id) REFERENCES dim_product_category(product_category_id));",
     "fact_orders": "CREATE TABLE IF NOT EXISTS fact_orders (order_id INT NOT NULL PRIMARY KEY,order_date DATE NOT NULL,user_id INT NOT NULL,payment_id INT NOT NULL,shipper_id INT NOT NULL,order_price INT NOT NULL,order_discount INT,voucher_id INT,order_total INT NOT NULL,rating_id INT NOT NULL,FOREIGN KEY (user_id) REFERENCES dim_user(user_id),FOREIGN KEY (payment_id) REFERENCES dim_payment(payment_id),FOREIGN KEY (shipper_id) REFERENCES dim_shipper(shipper_id),FOREIGN KEY (voucher_id) REFERENCES dim_voucher(voucher_id),FOREIGN KEY (rating_id) REFERENCES dim_rating(rating_id));",
-    "dim_order_items": """
-        CREATE TABLE IF NOT EXISTS dim_order_items (
+    "fact_order_items": """
+        CREATE TABLE IF NOT EXISTS fact_order_items (
             order_item_id INT NOT NULL PRIMARY KEY,
             order_id INT NOT NULL,
             product_id INT NOT NULL,
@@ -99,7 +99,7 @@ ddl_marts = {
         INNER JOIN dim_payment dp ON fo.payment_id = dp.payment_id
         INNER JOIN dim_shipper ds ON fo.shipper_id = ds.shipper_id
         LEFT JOIN dim_voucher dv ON fo.voucher_id = dv.voucher_id
-        INNER JOIN dim_order_items doi ON fo.order_id = doi.order_id
+        INNER JOIN fact_order_items doi ON fo.order_id = doi.order_id
         INNER JOIN dim_product p ON doi.product_id = p.product_id
         INNER JOIN dim_product_category pc ON p.product_category_id = pc.product_category_id
         INNER JOIN dim_rating dr ON fo.rating_id = dr.rating_id
